@@ -28,6 +28,7 @@ with PlatformClient(
         url="https://your-app.com/hooks/dograh",
         events=["workflow.run.completed"],
     )
+
     print(webhook["secret"])  # store securely
 
     result = platform.trigger_call(
@@ -39,7 +40,6 @@ with PlatformClient(
 ```
 
 ## TypeScript
-
 ```typescript
 import { PlatformClient } from "@dograh/sdk";
 
@@ -55,6 +55,7 @@ await platform.triggerCall("your-trigger-uuid", {
 ```
 
 ## Generated SDK methods
+
 
 After running `scripts/generate_sdk.sh`, these platform routes are also available on `DograhClient`:
 
@@ -76,6 +77,7 @@ After running `scripts/generate_sdk.sh`, these platform routes are also availabl
 ## Project layout
 
 ```
+
 sdk/
 ├── python/src/dograh_sdk/
 │   ├── client.py          # Workflow REST client (generated + helpers)
