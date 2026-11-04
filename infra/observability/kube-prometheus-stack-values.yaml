@@ -2,7 +2,7 @@
 # Install:
 #   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 #   helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
-#     -n monitoring --create-namespace \
+#     
 #     -f infra/observability/kube-prometheus-stack-values.yaml
 
 grafana:
@@ -19,6 +19,8 @@ grafana:
       url: http://prometheus-kube-prometheus-prometheus.monitoring:9090
       access: proxy
       isDefault: true
+
+
 
 prometheus:
   prometheusSpec:
@@ -38,7 +40,6 @@ alertmanager:
 
 kubeStateMetrics:
   enabled: true
-
 nodeExporter:
   enabled: true
 
