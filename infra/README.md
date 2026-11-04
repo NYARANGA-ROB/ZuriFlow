@@ -1,4 +1,4 @@
-# Dograh Production Infrastructure
+# ZuriFlow Production Infrastructure
 
 Kubernetes deployment assets for the Dograh AI voice platform.
 
@@ -18,6 +18,7 @@ scripts/entrypoints/        # K8s process entrypoints (api, worker, gpu, migrate
 ### Prerequisites
 
 - Kubernetes 1.28+
+- 
 - NGINX Ingress Controller (WebSocket support)
 - cert-manager (optional, for TLS)
 - Prometheus Operator (optional, for ServiceMonitor)
@@ -25,7 +26,6 @@ scripts/entrypoints/        # K8s process entrypoints (api, worker, gpu, migrate
 - NVIDIA device plugin (optional, for GPU workers)
 
 ### Install
-
 ```bash
 # 1. Create secrets (production — use External Secrets Operator in real deployments)
 kubectl create namespace dograh
@@ -47,6 +47,7 @@ helm upgrade --install dograh ./infra/helm/dograh \
   --set images.worker.tag=1.0.0 \
   --set images.ui.tag=1.0.0
 ```
+
 
 ### Kustomize (without Helm)
 
@@ -89,7 +90,7 @@ docker build -f infra/docker/api.Dockerfile -t dograh-api:k8s .
 docker build -f infra/docker/worker.Dockerfile --build-arg API_IMAGE=dograh-api:k8s -t dograh-worker:k8s .
 
 # GPU worker (optional)
-docker build -f infra/docker/gpu-worker.Dockerfile --build-arg API_IMAGE=dograh-api:k8s -t dograh-gpu-worker:k8s .
+docker build -f infra/docker/gpu-worker.Dockerfile --build-arg API_IMAGE=dograh-api:k8s -t dograh-gpu-worker:k8s
 ```
 
 The root `api/Dockerfile` remains the Compose/OSS monolith image. K8s deployments override the command to use `scripts/entrypoints/k8s-*.sh`.
