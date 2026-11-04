@@ -2,19 +2,7 @@
 
 **Voice AI built for Kenya — open source and self-hostable.** Deploy production voice agents that speak natural Swahili, English, and Sheng; collect M-Pesa payments on live calls; and run Kenya-ready workflows for fintech, collections, retail, and support. From zero to a working bot in under 2 minutes.
 
-<p align="center">
-  <a href="https://app.dograh.com">
-    <img src="https://img.shields.io/badge/▶_Try_the_Cloud-app.dograh.com-2563eb?style=for-the-badge" alt="Try the Cloud">
-  </a>
-  &nbsp;
-  <a href="#-get-started">
-    <img src="https://img.shields.io/badge/⚡_Self--host_in_60s-One_command-111827?style=for-the-badge" alt="Self-host in 60s">
-  </a>
-  &nbsp;
-  <a href="https://join.slack.com/t/dograh-community/shared_invite/zt-3zjb5vwvl-j7hRz3_F1SOn5cH~jm5f5g">
-    <img src="https://img.shields.io/badge/💬_Join_Slack-Community-4A154B?style=for-the-badge&logo=slack" alt="Join Slack">
-  </a>
-</p>
+
 
 <p align="center">
   <a href="https://docs.dograh.com">📖 Docs</a> &nbsp;·&nbsp;
