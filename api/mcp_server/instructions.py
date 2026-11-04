@@ -1,5 +1,6 @@
 """Top-level orchestration guide surfaced to every MCP session.
 
+
 Sent to the client via `FastMCP(instructions=...)` — the client bakes
 this into its system prompt, so every LLM session sees it before the
 first tool call. Prefer procedural orchestration here (call order, error
