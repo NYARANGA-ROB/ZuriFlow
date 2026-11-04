@@ -261,19 +261,4 @@ We love contributions! ZuriFlow is 100% open source and we intend to keep it tha
   <img src="https://api.star-history.com/svg?repos=dograh-hq/dograh&type=Date" alt="ZuriFlow star history" width="80%">
 </a>
 
-## 📄 License
 
-ZuriFlow is licensed under the [BSD 2-Clause License](LICENSE) — the same license as projects that were used in building this platform, ensuring compatibility and freedom to use, modify, and distribute.
-
-## 🏢 About
-
-**ZuriFlow** is built with ❤️ by [Dograh](https://www.dograh.com) (Zansat Technologies Private Limited) — voice AI for Kenya and beyond.
-Founded by YC alumni and exit founders committed to keeping voice AI open and accessible to everyone.
-
-<br><br><br>
-
-  <p align="center">
-    <a href="https://github.com/dograh-hq/dograh/stargazers">⭐ Star us on GitHub</a> |
-    <a href="https://app.dograh.com">☁️ Try Cloud Version</a> |
-    <a href="https://join.slack.com/t/dograh-community/shared_invite/zt-3zjb5vwvl-j7hRz3_F1SOn5cH~jm5f5g">💬 Join Slack</a>
-  </p>
