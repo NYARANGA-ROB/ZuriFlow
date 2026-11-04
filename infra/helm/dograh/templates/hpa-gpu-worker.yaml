@@ -1,0 +1,22 @@
+{{- if .Values.gpuWorker.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "dograh.fullname" . }}-gpu-worker
+  labels:
+    {{- include "dograh.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "dograh.fullname" . }}-gpu-worker
+  minReplicas: {{ .Values.gpuWorker.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.gpuWorker.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+{{- end }}

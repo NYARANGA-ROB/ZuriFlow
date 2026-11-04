@@ -1,0 +1,55 @@
+---
+title: "Rate limits"
+description: "HTTP rate limiting for the Dograh public API platform"
+---
+
+The platform applies sliding-window rate limits to protect your organization and Dograh infrastructure.
+
+## Scopes
+
+Limits are enforced independently at two scopes:
+
+1. **Organization** — total platform requests across all keys
+2. **API key** — requests made with a single key
+
+Both must pass for a request to succeed.
+
+## Response headers
+
+Successful responses include:
+
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 59
+```
+
+When rate limited:
+
+```
+HTTP/1.1 429 Too Many Requests
+Retry-After: 12
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 0
+
+{"detail": "Rate limit exceeded"}
+```
+
+## Defaults
+
+| Scope | Default limit |
+|-------|---------------|
+| Organization | 120 req / min |
+| API key | 60 req / min |
+
+Self-hosted deployments can override via environment variables:
+
+```
+PUBLIC_API_RATE_LIMIT_PER_ORG_PER_MIN=120
+PUBLIC_API_RATE_LIMIT_PER_KEY_PER_MIN=60
+```
+
+## Best practices
+
+- Exponential backoff on `429` responses using the `Retry-After` header
+- Use separate API keys per service so one noisy integration does not exhaust org quota
+- Monitor usage via `GET /platform/usage` to tune client concurrency

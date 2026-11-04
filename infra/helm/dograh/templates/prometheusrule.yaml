@@ -1,0 +1,37 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "dograh.fullname" . }}-alerts
+  labels:
+    {{- include "dograh.labels" . | nindent 4 }}
+    release: prometheus
+spec:
+  groups:
+    - name: dograh-voice.rules
+      rules:
+        - alert: DograhApiDown
+          expr: up{job=~".*{{ include "dograh.fullname" . }}-api.*"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: Dograh API pods are down
+        - alert: DograhHighErrorRate
+          expr: |
+            sum(rate(http_requests_total{job=~".*{{ include "dograh.fullname" . }}-api.*",status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job=~".*{{ include "dograh.fullname" . }}-api.*"}[5m])) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Dograh API 5xx rate above 5%
+        - alert: DograhWorkerNotReady
+          expr: kube_deployment_status_replicas_available{deployment=~"{{ include "dograh.fullname" . }}-worker"} == 0
+          for: 3m
+          labels:
+            severity: critical
+          annotations:
+            summary: No Dograh worker pods available
+{{- end }}

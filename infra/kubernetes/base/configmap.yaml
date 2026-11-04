@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dograh-config
+  namespace: dograh
+data:
+  ENVIRONMENT: production
+  DEPLOYMENT_MODE: oss
+  LOG_LEVEL: INFO
+  LOG_TO_FILE: "false"
+  FORWARDED_ALLOW_IPS: "*"
+  ENABLE_TELEMETRY: "true"

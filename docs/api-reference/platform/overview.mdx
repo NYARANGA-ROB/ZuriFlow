@@ -1,0 +1,118 @@
+---
+title: "Platform API"
+description: "Developer platform for AI voice workflows — REST, webhooks, rate limits, and usage analytics"
+---
+
+The Dograh **Platform API** (`/api/v1/platform`) is the developer-facing surface for integrating AI voice workflows into your product. It provides:
+
+- REST endpoints for triggering calls and managing webhooks
+- API key authentication via `X-API-Key`
+- Per-organization and per-key rate limiting
+- Usage analytics with path-level breakdowns
+- HMAC-signed outbound webhooks
+
+## Base URL
+
+```
+https://your-dograh-instance/api/v1/platform
+```
+
+## Authentication
+
+All platform endpoints require an organization API key:
+
+```bash
+curl https://your-dograh-instance/api/v1/platform \
+  -H "X-API-Key: dgr_your_api_key"
+```
+
+Create keys in the Dograh UI under **Settings → API Keys**, or via the [API Keys API](/api-reference/api-keys/create).
+
+<Note>
+API keys use the `dgr_` prefix. Keys are shown once at creation — store them securely.
+</Note>
+
+## Rate limiting
+
+Platform requests are rate limited per organization and per API key. When exceeded, the API returns `429 Too Many Requests` with a `Retry-After` header.
+
+| Header | Description |
+|--------|-------------|
+| `X-RateLimit-Limit` | Maximum requests per minute |
+| `X-RateLimit-Remaining` | Remaining requests in the current window |
+| `Retry-After` | Seconds to wait before retrying (on 429) |
+
+Default limits (configurable via environment):
+
+- **Organization:** 120 requests / minute
+- **API key:** 60 requests / minute
+
+## Gateway discovery
+
+```bash
+curl https://your-dograh-instance/api/v1/platform \
+  -H "X-API-Key: dgr_your_api_key"
+```
+
+```bash
+curl https://your-dograh-instance/api/v1/platform/routes \
+  -H "X-API-Key: dgr_your_api_key"
+```
+
+## Trigger voice calls
+
+Trigger an outbound AI voice call using an API Trigger node path:
+
+```bash
+curl -X POST https://your-dograh-instance/api/v1/platform/calls/trigger/YOUR_TRIGGER_UUID \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: dgr_your_api_key" \
+  -d '{
+    "phone_number": "+254712345678",
+    "initial_context": {"customer_name": "Jane"}
+  }'
+```
+
+Or trigger by workflow UUID:
+
+```bash
+curl -X POST https://your-dograh-instance/api/v1/platform/calls/workflow/YOUR_WORKFLOW_UUID \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: dgr_your_api_key" \
+  -d '{"phone_number": "+254712345678"}'
+```
+
+## Usage analytics
+
+```bash
+curl "https://your-dograh-instance/api/v1/platform/usage?scope=organization" \
+  -H "X-API-Key: dgr_your_api_key"
+```
+
+Use `scope=api_key` to scope metrics to the authenticated key.
+
+## SDK
+
+Python:
+
+```python
+from dograh_sdk import PlatformClient
+
+with PlatformClient(base_url="https://app.dograh.com", api_key="dgr_...") as client:
+    info = client.info()
+    client.trigger_call("trigger-uuid", phone_number="+254712345678")
+```
+
+TypeScript:
+
+```typescript
+import { PlatformClient } from "@dograh/sdk";
+
+const client = new PlatformClient({
+  baseUrl: "https://app.dograh.com",
+  apiKey: "dgr_...",
+});
+await client.triggerCall("trigger-uuid", { phone_number: "+254712345678" });
+```
+
+See [Webhooks](/api-reference/platform/webhooks) and [Rate limits](/api-reference/platform/rate-limits) for more detail.

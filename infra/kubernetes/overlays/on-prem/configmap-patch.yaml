@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dograh-config
+  namespace: dograh
+data:
+  ENVIRONMENT: production
+  DEPLOYMENT_MODE: oss
+  LOG_LEVEL: INFO
+  ENABLE_TELEMETRY: "true"
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.dograh-observability.svc:4317
+  OTEL_SERVICE_NAME: dograh-api
+  LOCAL_INFERENCE_ENABLED: "true"
+  INFERENCE_ROUTING_MODE: cluster-local

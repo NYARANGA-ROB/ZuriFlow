@@ -1,0 +1,58 @@
+# Optional dedicated namespace for a large enterprise tenant.
+# Clone per tenant; wire separate DB credentials and ingress host.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dograh-tenant-REPLACE_ME
+  labels:
+    app.kubernetes.io/part-of: dograh
+    dograh.io/tenant-isolation: dedicated
+    dograh.io/tenant-id: "REPLACE_ME"
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: tenant-quota
+  namespace: dograh-tenant-REPLACE_ME
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: 32Gi
+    limits.cpu: "16"
+    limits.memory: 64Gi
+    persistentvolumeclaims: "5"
+    pods: "30"
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tenant-deny-cross-namespace
+  namespace: dograh-tenant-REPLACE_ME
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dograh-tenant-REPLACE_ME
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dograh-tenant-REPLACE_ME
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              dograh.io/zone: inference
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

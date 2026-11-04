@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dograh-api
+  namespace: dograh
+spec:
+  template:
+    spec:
+      containers:
+        - name: api
+          envFrom:
+            - configMapRef:
+                name: dograh-inference-routes
+                optional: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dograh-worker
+  namespace: dograh
+spec:
+  template:
+    spec:
+      containers:
+        - name: worker
+          envFrom:
+            - configMapRef:
+                name: dograh-inference-routes
+                optional: true

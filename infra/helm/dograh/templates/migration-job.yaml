@@ -1,0 +1,28 @@
+{{- if .Values.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "dograh.fullname" . }}-migrate-{{ .Release.Revision }}
+  labels:
+    {{- include "dograh.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.migration.backoffLimit }}
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "dograh.fullname" . }}
+      containers:
+        - name: migrate
+          image: {{ include "dograh.image" (dict "global" .Values.global "repository" .Values.images.api.repository "tag" (.Values.images.api.tag | default .Chart.AppVersion) "defaultTag" .Chart.AppVersion) }}
+          command: ["./scripts/entrypoints/k8s-migrate.sh"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "dograh.secretName" . }}
+                  key: DATABASE_URL
+{{- end }}

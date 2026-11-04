@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dograh-worker
+  namespace: dograh
+  labels:
+    app.kubernetes.io/name: dograh
+    app.kubernetes.io/component: worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dograh
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dograh
+        app.kubernetes.io/component: worker
+    spec:
+      containers:
+        - name: worker
+          image: dograh-worker
+          command: ["./scripts/entrypoints/k8s-worker.sh"]
+          envFrom:
+            - configMapRef:
+                name: dograh-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: dograh-secrets
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: dograh-secrets
+                  key: REDIS_URL
+            - name: ARQ_WORKERS
+              value: "2"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi

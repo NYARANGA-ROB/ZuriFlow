@@ -1,0 +1,11 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dograh
+spec:
+  tls:
+    - hosts:
+        - voice.yourcompany.com
+      secretName: dograh-production-tls
+  rules:
+    - host: voice.yourcompany.com

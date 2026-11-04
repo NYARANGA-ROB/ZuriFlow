@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dograh.fullname" . }}-ui
+  labels:
+    {{- include "dograh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ui
+spec:
+  {{- if not .Values.ui.autoscaling.enabled }}
+  replicas: {{ .Values.ui.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "dograh.ui.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "dograh.ui.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: ui
+          image: {{ include "dograh.image" (dict "global" .Values.global "repository" .Values.images.ui.repository "tag" (.Values.images.ui.tag | default .Chart.AppVersion) "defaultTag" .Chart.AppVersion) }}
+          imagePullPolicy: {{ .Values.images.ui.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.ui.port }}
+          env:
+            - name: PORT
+              value: {{ .Values.ui.port | quote }}
+            - name: BACKEND_URL
+              value: http://{{ include "dograh.fullname" . }}-api:{{ .Values.api.port }}
+            - name: NEXT_PUBLIC_BACKEND_URL
+              value: https://{{ (index .Values.ingress.hosts 0).host }}/api/v1
+          resources:
+            {{- toYaml .Values.ui.resources | nindent 12 }}

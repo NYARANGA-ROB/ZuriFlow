@@ -1,0 +1,32 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: dograh-onprem-alerts
+  namespace: dograh-observability
+  labels:
+    app.kubernetes.io/part-of: dograh
+spec:
+  groups:
+    - name: dograh.voice
+      rules:
+        - alert: DograhApiDown
+          expr: up{job="dograh-api"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: Dograh API scrape target is down
+        - alert: DograhHighCallLatency
+          expr: histogram_quantile(0.95, sum(rate(dograh_voice_ttfb_seconds_bucket[5m])) by (le)) > 2
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: p95 voice TTFB exceeds 2s
+        - alert: DograhInferenceUnreachable
+          expr: dograh_local_inference_endpoint_up == 0
+          for: 3m
+          labels:
+            severity: critical
+          annotations:
+            summary: Local inference endpoint health check failed

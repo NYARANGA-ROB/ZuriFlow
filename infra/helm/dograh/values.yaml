@@ -1,0 +1,270 @@
+# Default values for Dograh production deployment.
+# Override per environment with values-production.yaml or --set flags.
+
+global:
+  imageRegistry: ghcr.io
+  imagePullSecrets: []
+  storageClass: ""
+
+nameOverride: ""
+fullnameOverride: ""
+
+# ── Images ─────────────────────────────────────────────────────────────
+images:
+  api:
+    repository: dograh/dograh-api
+    tag: ""          # defaults to Chart.appVersion
+    pullPolicy: IfNotPresent
+  worker:
+    repository: dograh/dograh-worker
+    tag: ""
+    pullPolicy: IfNotPresent
+  ui:
+    repository: dograh/dograh-ui
+    tag: ""
+    pullPolicy: IfNotPresent
+  gpuWorker:
+    repository: dograh/dograh-gpu-worker
+    tag: ""
+    pullPolicy: IfNotPresent
+
+# ── API (FastAPI / WebSockets) ─────────────────────────────────────────
+api:
+  replicaCount: 2
+  port: 8000
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+  livenessProbe:
+    path: /api/v1/health
+    initialDelaySeconds: 30
+    periodSeconds: 15
+  readinessProbe:
+    path: /api/v1/realtime-observability/health/ready
+    initialDelaySeconds: 20
+    periodSeconds: 10
+
+# ── Background workers (ARQ + orchestrators) ───────────────────────────
+worker:
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 75
+    keda:
+      enabled: false
+  env:
+    ARQ_WORKERS: "2"
+    ENABLE_ARI_MANAGER: "true"
+    ENABLE_CAMPAIGN_ORCHESTRATOR: "true"
+
+# ── GPU workers (optional on-cluster inference) ────────────────────────
+gpuWorker:
+  enabled: false
+  replicaCount: 1
+  nodeSelector:
+    accelerator: nvidia-gpu
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+  resources:
+    requests:
+      cpu: "2"
+      memory: 8Gi
+      nvidia.com/gpu: 1
+    limits:
+      cpu: "4"
+      memory: 16Gi
+      nvidia.com/gpu: 1
+  autoscaling:
+    enabled: false
+    minReplicas: 0
+    maxReplicas: 4
+  env:
+    ARQ_WORKERS: "1"
+    GPU_QUEUE_NAME: gpu_voice
+
+# ── UI (Next.js) ───────────────────────────────────────────────────────
+ui:
+  replicaCount: 2
+  port: 3010
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+
+# ── Ingress (WebSocket + long-lived connections) ───────────────────────
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$remote_addr"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: dograh.example.com
+      paths:
+        - path: /api/v1
+          pathType: Prefix
+          service: api
+        - path: /
+          pathType: Prefix
+          service: ui
+  tls:
+    - secretName: dograh-tls
+      hosts:
+        - dograh.example.com
+
+# ── PostgreSQL ─────────────────────────────────────────────────────────
+postgresql:
+  enabled: true
+  image: pgvector/pgvector:pg17
+  auth:
+    username: postgres
+    password: ""       # set via secret
+    database: postgres
+  persistence:
+    enabled: true
+    size: 50Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+  # Set external.enabled=true to use managed Postgres instead
+  external:
+    enabled: false
+    host: ""
+    port: 5432
+    database: postgres
+    username: postgres
+    existingSecret: dograh-secrets
+    secretKey: database-url
+
+# ── Redis ──────────────────────────────────────────────────────────────
+redis:
+  enabled: true
+  image: redis:7-alpine
+  auth:
+    password: ""       # set via secret
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  external:
+    enabled: false
+    host: ""
+    port: 6379
+    existingSecret: dograh-secrets
+    secretKey: redis-url
+
+# ── MinIO (optional in-cluster object storage) ─────────────────────────
+minio:
+  enabled: true
+  persistence:
+    size: 100Gi
+
+# ── Migrations ───────────────────────────────────────────────────────
+migration:
+  enabled: true
+  backoffLimit: 3
+
+# ── Observability ──────────────────────────────────────────────────────
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /api/v1/realtime-observability/metrics
+  prometheusRule:
+    enabled: true
+  grafanaDashboard:
+    enabled: true
+
+# ── Application environment ────────────────────────────────────────────
+env:
+  ENVIRONMENT: production
+  DEPLOYMENT_MODE: oss
+  LOG_LEVEL: INFO
+  LOG_TO_FILE: "false"
+  FORWARDED_ALLOW_IPS: "*"
+  ENABLE_TELEMETRY: "true"
+  SERIALIZE_LOG_OUTPUT: "true"
+
+# Sensitive values — prefer existingSecret in production
+secrets:
+  create: true
+  existingSecret: ""
+  ossJwtSecret: changeme-generate-strong-secret
+  postgresPassword: changeme-postgres
+  redisPassword: changeme-redis
+
+# Extra env vars appended to api + worker
+extraEnv: []
+# - name: SENTRY_DSN
+#   valueFrom:
+#     secretKeyRef:
+#       name: dograh-secrets
+#       key: sentry-dsn
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ── On-prem enterprise ─────────────────────────────────────────────────
+onPrem:
+  enabled: false
+  offline: false
+  privateNetworking: false
+  tenantNetworkPolicies: false
+  localInference:
+    enabled: false
+    namespace: dograh-inference
+    configMapName: dograh-inference-routes

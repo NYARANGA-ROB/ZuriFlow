@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dograh
+
+resources:
+  - ../../base
+  - inference-routes-configmap.yaml
+  - ../../../on-prem/tenant/network-policies.yaml
+
+patches:
+  - path: configmap-patch.yaml
+  - path: ingress-internal.patch.yaml
+  - path: gpu-worker-enable.patch.yaml
+  - path: inference-routes.patch.yaml
+
+images:
+  - name: dograh-api
+    newName: registry.internal/dograh/dograh-api
+    newTag: on-prem
+  - name: dograh-worker
+    newName: registry.internal/dograh/dograh-worker
+    newTag: on-prem
+  - name: dograh-ui
+    newName: registry.internal/dograh/dograh-ui
+    newTag: on-prem
+
+commonLabels:
+  dograh.io/deployment: on-prem

@@ -1,0 +1,102 @@
+# vLLM — OpenAI-compatible local LLM endpoint for on-prem Dograh.
+# Requires NVIDIA GPU nodes and nvidia.com/gpu device plugin.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vllm-model-cache
+  namespace: dograh-inference
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dograh-vllm
+  namespace: dograh-inference
+  labels:
+    app.kubernetes.io/name: dograh-vllm
+    app.kubernetes.io/component: llm
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dograh-vllm
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dograh-vllm
+        app.kubernetes.io/component: llm
+    spec:
+      nodeSelector:
+        accelerator: nvidia-gpu
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:latest
+          args:
+            - --model
+            - meta-llama/Llama-3.2-3B-Instruct
+            - --host
+            - "0.0.0.0"
+            - --port
+            - "8000"
+            - --max-model-len
+            - "8192"
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: HF_HOME
+              value: /models
+          volumeMounts:
+            - name: model-cache
+              mountPath: /models
+          resources:
+            requests:
+              cpu: "4"
+              memory: 16Gi
+              nvidia.com/gpu: 1
+            limits:
+              cpu: "8"
+              memory: 32Gi
+              nvidia.com/gpu: 1
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 180
+            periodSeconds: 30
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: vllm-model-cache
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dograh-vllm
+  namespace: dograh-inference
+  labels:
+    app.kubernetes.io/name: dograh-vllm
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: dograh-vllm
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http

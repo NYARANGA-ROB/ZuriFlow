@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dograh.fullname" . }}-worker
+  labels:
+    {{- include "dograh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  {{- if not .Values.worker.autoscaling.enabled }}
+  replicas: {{ .Values.worker.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "dograh.worker.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "dograh.worker.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "dograh.fullname" . }}
+      containers:
+        - name: worker
+          image: {{ include "dograh.image" (dict "global" .Values.global "repository" .Values.images.worker.repository "tag" (.Values.images.worker.tag | default .Chart.AppVersion) "defaultTag" .Chart.AppVersion) }}
+          imagePullPolicy: {{ .Values.images.worker.pullPolicy }}
+          command: ["./scripts/entrypoints/k8s-worker.sh"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "dograh.fullname" . }}-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "dograh.secretName" . }}
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "dograh.secretName" . }}
+                  key: REDIS_URL
+            {{- range $key, $value := .Values.worker.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}

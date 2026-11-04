@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dograh-grafana-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: dograh
+data:
+  dograh-realtime-voice.json: |
+    {
+      "title": "Dograh Realtime Voice",
+      "uid": "dograh-realtime-voice",
+      "schemaVersion": 39,
+      "version": 1,
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Active voice sessions",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+          "targets": [
+            {
+              "expr": "sum(realtime_voice_active_sessions)",
+              "legendFormat": "sessions"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "API request rate",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+          "targets": [
+            {
+              "expr": "sum(rate(http_requests_total{job=~\".*dograh-api.*\"}[5m]))",
+              "legendFormat": "rps"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "5xx error rate",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+          "targets": [
+            {
+              "expr": "sum(rate(http_requests_total{job=~\".*dograh-api.*\",status=~\"5..\"}[5m]))",
+              "legendFormat": "5xx/s"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Worker CPU",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+          "targets": [
+            {
+              "expr": "sum(rate(container_cpu_usage_seconds_total{pod=~\".*dograh-worker.*\"}[5m]))",
+              "legendFormat": "cpu"
+            }
+          ]
+        }
+      ]
+    }

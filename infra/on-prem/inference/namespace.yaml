@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dograh-inference
+  labels:
+    app.kubernetes.io/part-of: dograh
+    dograh.io/zone: inference

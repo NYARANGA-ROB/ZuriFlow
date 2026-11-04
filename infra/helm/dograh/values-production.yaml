@@ -1,0 +1,57 @@
+# Production overrides — use with:
+#   helm upgrade --install dograh ./infra/helm/dograh -f infra/helm/dograh/values-production.yaml
+
+api:
+  replicaCount: 3
+  autoscaling:
+    minReplicas: 3
+    maxReplicas: 30
+
+worker:
+  replicaCount: 3
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 15
+
+ui:
+  replicaCount: 2
+
+postgresql:
+  persistence:
+    size: 100Gi
+  external:
+    enabled: false
+
+redis:
+  persistence:
+    size: 20Gi
+  external:
+    enabled: false
+
+ingress:
+  hosts:
+    - host: voice.yourcompany.com
+      paths:
+        - path: /api/v1
+          pathType: Prefix
+          service: api
+        - path: /
+          pathType: Prefix
+          service: ui
+  tls:
+    - secretName: dograh-production-tls
+      hosts:
+        - voice.yourcompany.com
+
+secrets:
+  create: false
+  existingSecret: dograh-production-secrets
+
+env:
+  ENVIRONMENT: production
+  DEPLOYMENT_MODE: oss
+
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true

@@ -1,0 +1,52 @@
+{{- if .Values.gpuWorker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dograh.fullname" . }}-gpu-worker
+  labels:
+    {{- include "dograh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gpu-worker
+spec:
+  replicas: {{ .Values.gpuWorker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "dograh.gpuWorker.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "dograh.gpuWorker.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.gpuWorker.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gpuWorker.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: gpu-worker
+          image: {{ include "dograh.image" (dict "global" .Values.global "repository" .Values.images.gpuWorker.repository "tag" (.Values.images.gpuWorker.tag | default .Chart.AppVersion) "defaultTag" .Chart.AppVersion) }}
+          imagePullPolicy: {{ .Values.images.gpuWorker.pullPolicy }}
+          command: ["./scripts/entrypoints/k8s-gpu-worker.sh"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "dograh.fullname" . }}-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "dograh.secretName" . }}
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "dograh.secretName" . }}
+                  key: REDIS_URL
+            {{- range $key, $value := .Values.gpuWorker.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.gpuWorker.resources | nindent 12 }}
+{{- end }}

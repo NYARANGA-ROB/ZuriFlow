@@ -1,0 +1,87 @@
+---
+title: "Webhooks"
+description: "Receive signed platform events when voice workflow runs complete"
+---
+
+Register webhook endpoints to receive HTTP POST callbacks when platform events occur in your organization.
+
+## Create a subscription
+
+```bash
+curl -X POST https://your-dograh-instance/api/v1/platform/webhooks \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: dgr_your_api_key" \
+  -d '{
+    "name": "Production callbacks",
+    "url": "https://your-app.com/webhooks/dograh",
+    "events": ["workflow.run.completed"]
+  }'
+```
+
+The response includes a `secret` field **once**. Use it to verify signatures on incoming requests.
+
+## Supported events
+
+| Event | Description |
+|-------|-------------|
+| `workflow.run.started` | A workflow run was created |
+| `workflow.run.completed` | A workflow run finished successfully |
+| `workflow.run.failed` | A workflow run failed |
+| `call.initiated` | An outbound call was placed |
+| `call.completed` | A call ended |
+
+## Payload format
+
+```json
+{
+  "id": "evt_abc123",
+  "type": "workflow.run.completed",
+  "created_at": "2026-06-24T08:00:00+00:00",
+  "organization_id": 1,
+  "data": {
+    "workflow_run_id": 42,
+    "workflow_id": 7,
+    "workflow_uuid": "a1b2c3...",
+    "status": "completed"
+  }
+}
+```
+
+## Signature verification
+
+Each delivery includes:
+
+| Header | Description |
+|--------|-------------|
+| `X-Dograh-Signature` | `sha256=<hex>` HMAC of `{timestamp}.{body}` |
+| `X-Dograh-Timestamp` | Unix timestamp used in the signature |
+| `X-Dograh-Event` | Event type |
+| `X-Dograh-Delivery` | Unique delivery ID |
+
+Python verification example:
+
+```python
+import hashlib
+import hmac
+
+def verify(secret: str, timestamp: str, body: str, signature: str) -> bool:
+    expected = hmac.new(
+        secret.encode(),
+        f"{timestamp}.{body}".encode(),
+        hashlib.sha256,
+    ).hexdigest()
+    return hmac.compare_digest(f"sha256={expected}", signature)
+```
+
+## Test delivery
+
+```bash
+curl -X POST https://your-dograh-instance/api/v1/platform/webhooks/whsub_abc123/test \
+  -H "X-API-Key: dgr_your_api_key"
+```
+
+## Manage subscriptions
+
+- `GET /platform/webhooks` — list subscriptions
+- `PATCH /platform/webhooks/{subscription_uuid}` — update URL, events, or active state
+- `DELETE /platform/webhooks/{subscription_uuid}` — remove a subscription

@@ -1,0 +1,51 @@
+# Optional — enable when GPU nodes are available (NVIDIA device plugin required).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dograh-gpu-worker
+  namespace: dograh
+  labels:
+    app.kubernetes.io/name: dograh
+    app.kubernetes.io/component: gpu-worker
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dograh
+      app.kubernetes.io/component: gpu-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dograh
+        app.kubernetes.io/component: gpu-worker
+    spec:
+      nodeSelector:
+        accelerator: nvidia-gpu
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: gpu-worker
+          image: ghcr.io/dograh/dograh-gpu-worker:latest
+          command: ["./scripts/entrypoints/k8s-gpu-worker.sh"]
+          env:
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: dograh-secrets
+                  key: REDIS_URL
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: dograh-secrets
+                  key: DATABASE_URL
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+              memory: 16Gi
+              cpu: "4"
+            requests:
+              nvidia.com/gpu: 1
+              memory: 8Gi
+              cpu: "2"

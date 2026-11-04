@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dograh-postgresql
+  namespace: dograh
+spec:
+  serviceName: dograh-postgresql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dograh-postgresql
+  template:
+    metadata:
+      labels:
+        app: dograh-postgresql
+    spec:
+      containers:
+        - name: postgresql
+          image: pgvector/pgvector:pg17
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dograh-secrets
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 50Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dograh-postgresql
+  namespace: dograh
+spec:
+  selector:
+    app: dograh-postgresql
+  ports:
+    - port: 5432

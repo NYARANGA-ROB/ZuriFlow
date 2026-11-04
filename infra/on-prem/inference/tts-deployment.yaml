@@ -1,0 +1,56 @@
+# Lightweight TTS for on-prem (Piper / OpenAI-compatible wrapper).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dograh-tts
+  namespace: dograh-inference
+  labels:
+    app.kubernetes.io/name: dograh-tts
+    app.kubernetes.io/component: tts
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dograh-tts
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dograh-tts
+        app.kubernetes.io/component: tts
+    spec:
+      containers:
+        - name: tts
+          # Replace with mirrored image in air-gap
+          image: rhasspy/wyoming-piper:latest
+          args:
+            - --voice
+            - en_US-lessac-medium
+          ports:
+            - name: wyoming
+              containerPort: 10200
+            - name: http
+              containerPort: 5000
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dograh-tts
+  namespace: dograh-inference
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: dograh-tts
+  ports:
+    - name: http
+      port: 5000
+      targetPort: http
+    - name: wyoming
+      port: 10200
+      targetPort: wyoming

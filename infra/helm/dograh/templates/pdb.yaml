@@ -1,0 +1,13 @@
+{{- if .Values.api.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "dograh.fullname" . }}-api
+  labels:
+    {{- include "dograh.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.api.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "dograh.api.selectorLabels" . | nindent 6 }}
+{{- end }}

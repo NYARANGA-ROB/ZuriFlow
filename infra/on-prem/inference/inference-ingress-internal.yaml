@@ -1,0 +1,29 @@
+# Internal-only ingress for inference admin/health (optional).
+# Production voice traffic should use cluster DNS from API pods, not this ingress.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dograh-inference-internal
+  namespace: dograh-inference
+  annotations:
+    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: inference.corp.internal
+      http:
+        paths:
+          - path: /vllm
+            pathType: Prefix
+            backend:
+              service:
+                name: dograh-vllm
+                port:
+                  number: 8000
+          - path: /whisper
+            pathType: Prefix
+            backend:
+              service:
+                name: dograh-whisper
+                port:
+                  number: 9000

@@ -1,0 +1,9 @@
+# Optional ML stack for Kenyan accent detection.
+# Install alongside the main API requirements:
+#   pip install -r api/requirements.txt -r api/requirements.kenyan-accent.txt
+torch>=2.2.0
+torchaudio>=2.2.0
+librosa>=0.10.2
+numpy>=1.26.0
+scipy>=1.11.0
+pyannote.audio>=3.1.0

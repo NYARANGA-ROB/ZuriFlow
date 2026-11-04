@@ -1,0 +1,13 @@
+apiVersion: v2
+name: dograh
+description: Production Helm chart for the Dograh AI voice platform
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - voice-ai
+  - telephony
+  - websocket
+maintainers:
+  - name: Dograh
+    url: https://github.com/dograh-hq/dograh

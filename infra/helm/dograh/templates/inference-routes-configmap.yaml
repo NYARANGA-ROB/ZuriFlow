@@ -1,0 +1,32 @@
+{{- if .Values.onPrem.localInference.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.onPrem.localInference.configMapName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "dograh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: inference-routing
+data:
+  LOCAL_INFERENCE_ROUTES: |
+    {
+      "llm": {
+        "url": "http://dograh-vllm.{{ .Values.onPrem.localInference.namespace }}.svc.cluster.local:8000/v1",
+        "provider": "speaches",
+        "default_model": "llama3",
+        "timeout_seconds": 120
+      },
+      "stt": {
+        "url": "http://dograh-whisper.{{ .Values.onPrem.localInference.namespace }}.svc.cluster.local:9000",
+        "provider": "speaches",
+        "default_model": "whisper-large-v3",
+        "timeout_seconds": 60
+      },
+      "tts": {
+        "url": "http://dograh-tts.{{ .Values.onPrem.localInference.namespace }}.svc.cluster.local:5000",
+        "provider": "speaches",
+        "default_model": "piper-en",
+        "timeout_seconds": 30
+      }
+    }
+{{- end }}

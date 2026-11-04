@@ -1,0 +1,62 @@
+# kube-prometheus-stack values for Dograh voice platform monitoring.
+# Install:
+#   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#   helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
+#     -n monitoring --create-namespace \
+#     -f infra/observability/kube-prometheus-stack-values.yaml
+
+grafana:
+  enabled: true
+  adminPassword: changeme
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: dograh
+  additionalDataSources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-kube-prometheus-prometheus.monitoring:9090
+      access: proxy
+      isDefault: true
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    retention: 15d
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: "2"
+        memory: 4Gi
+
+alertmanager:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
+
+nodeExporter:
+  enabled: true
+
+defaultRules:
+  create: true
+
+# Dograh ServiceMonitor in the app namespace is picked up via label release=prometheus
+# or set serviceMonitorSelectorNilUsesHelmValues: false above.
+
+additionalPrometheusRulesMap:
+  dograh-voice:
+    groups:
+      - name: dograh.slo
+        rules:
+          - alert: DograhWebSocketLatencyHigh
+            expr: histogram_quantile(0.95, sum(rate(realtime_voice_response_latency_seconds_bucket[5m])) by (le)) > 2
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: P95 realtime voice latency above 2s

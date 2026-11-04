@@ -1,0 +1,87 @@
+---
+title: "SDK"
+description: "Python and TypeScript SDK starters for the Dograh platform API"
+---
+
+Dograh ships hand-written **PlatformClient** helpers alongside the auto-generated workflow SDK.
+
+## Python
+
+Install from the repo (or your published package):
+
+```bash
+pip install -e sdk/python
+```
+
+```python
+from dograh_sdk import PlatformClient
+
+with PlatformClient(
+    base_url="https://app.dograh.com",
+    api_key="dgr_your_api_key",
+) as platform:
+    print(platform.info())
+    print(platform.usage(scope="api_key"))
+
+    webhook = platform.create_webhook(
+        name="Prod",
+        url="https://your-app.com/hooks/dograh",
+        events=["workflow.run.completed"],
+    )
+    print(webhook["secret"])  # store securely
+
+    result = platform.trigger_call(
+        "your-trigger-uuid",
+        phone_number="+254712345678",
+        initial_context={"account_id": "A-100"},
+    )
+    print(result["workflow_run_id"])
+```
+
+## TypeScript
+
+```typescript
+import { PlatformClient } from "@dograh/sdk";
+
+const platform = new PlatformClient({
+  baseUrl: "https://app.dograh.com",
+  apiKey: process.env.DOGRAH_API_KEY,
+});
+
+const usage = await platform.usage("organization");
+await platform.triggerCall("your-trigger-uuid", {
+  phone_number: "+254712345678",
+});
+```
+
+## Generated SDK methods
+
+After running `scripts/generate_sdk.sh`, these platform routes are also available on `DograhClient`:
+
+| Method | HTTP |
+|--------|------|
+| `get_platform_info()` | `GET /platform` |
+| `get_platform_usage()` | `GET /platform/usage` |
+| `create_webhook_subscription()` | `POST /platform/webhooks` |
+| `trigger_voice_call()` | `POST /platform/calls/trigger/{path}` |
+| `trigger_voice_call_by_workflow()` | `POST /platform/calls/workflow/{uuid}` |
+
+## Environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `DOGRAH_API_URL` | Base URL (default `http://localhost:8000`) |
+| `DOGRAH_API_KEY` | Organization API key (`dgr_` prefix) |
+
+## Project layout
+
+```
+sdk/
+├── python/src/dograh_sdk/
+│   ├── client.py          # Workflow REST client (generated + helpers)
+│   ├── platform.py        # Platform API client (hand-written)
+│   └── _generated_client.py
+└── typescript/src/
+    ├── client.ts
+    └── platform.ts
+```

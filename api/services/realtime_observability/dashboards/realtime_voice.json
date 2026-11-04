@@ -1,0 +1,133 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"unit": "ms"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "id": 1,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(dograh_realtime_e2e_latency_ms_bucket[5m])) by (le))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(dograh_realtime_e2e_latency_ms_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ],
+      "title": "End-to-end latency (user → bot audio)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"unit": "ms"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "id": 2,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(dograh_realtime_stt_response_ms_bucket[5m])) by (le))",
+          "legendFormat": "STT p95"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(dograh_realtime_llm_first_token_ms_bucket[5m])) by (le))",
+          "legendFormat": "LLM TTFT p95"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(dograh_realtime_tts_first_byte_ms_bucket[5m])) by (le))",
+          "legendFormat": "TTS first byte p95"
+        }
+      ],
+      "title": "Stage latency p95 (STT / LLM / TTS)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"unit": "ms"}},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 8},
+      "id": 3,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(dograh_realtime_ws_roundtrip_ms_bucket[5m])) by (le))",
+          "legendFormat": "WS RTT p95"
+        }
+      ],
+      "title": "WebSocket round-trip latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 8},
+      "id": 4,
+      "targets": [
+        {
+          "expr": "sum(rate(dograh_realtime_interruptions_total[5m])) by (source)",
+          "legendFormat": "{{source}}"
+        }
+      ],
+      "title": "Interruption rate by source",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 8},
+      "id": 5,
+      "targets": [
+        {
+          "expr": "sum(rate(dograh_realtime_reconnects_total[5m])) by (endpoint)",
+          "legendFormat": "{{endpoint}}"
+        }
+      ],
+      "title": "Reconnect rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 16},
+      "id": 6,
+      "targets": [
+        {
+          "expr": "sum(dograh_realtime_active_sessions) by (endpoint)",
+          "legendFormat": "{{endpoint}}"
+        }
+      ],
+      "title": "Active sessions",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": {"h": 6, "w": 12, "x": 12, "y": 16},
+      "id": 7,
+      "targets": [
+        {
+          "expr": "sum(rate(dograh_realtime_turns_total[5m])) by (status)",
+          "legendFormat": "{{status}}"
+        }
+      ],
+      "title": "Turn completion rate",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": ["dograh", "realtime-voice", "latency"],
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {"text": "Prometheus", "value": "Prometheus"}
+      }
+    ]
+  },
+  "time": {"from": "now-1h", "to": "now"},
+  "title": "Dograh Realtime Voice",
+  "uid": "dograh-realtime-voice",
+  "version": 1
+}

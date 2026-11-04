@@ -1,0 +1,14 @@
+# Telephony
+
+Shared telephony code lives here. Provider-specific code lives in `providers/`;
+read `providers/AGENTS.md` before changing a provider package.
+
+- Workflows and campaigns request `START_CALL` via `start_call.execute_start_call`. They must not import a provider class.
+- Normalize inbound/status webhooks through `call_events` (`CALL_STARTED`, `CALL_RINGING`, `CALL_ANSWERED`, `CALL_ENDED`, `CALL_FAILED`, `DTMF_RECEIVED`, `MEDIA_STARTED`).
+- Do not fail over a call after `CALL_ANSWERED` — the customer is already on the line.
+- Kenyan numbers go through `kenya_dialing.resolve_outbound_number` before origination.
+
+- Keep provider-specific transports, serializers, config models, and webhook handlers in `providers/`.
+- Resolve providers through the shared telephony helpers in this folder; do not instantiate provider classes directly from routes, tasks, or unrelated services.
+- Keep telephony config lookups tenant-safe and respect any run-scoped telephony configuration carried on a workflow run.
+- Keep provider-specific HTTP routes in provider packages; shared route glue belongs in `api/routes/`.

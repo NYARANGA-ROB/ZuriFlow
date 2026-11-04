@@ -1,0 +1,156 @@
+# Enterprise on-prem Helm values — air-gapped, private networking, local GPU inference.
+# Usage:
+#   helm upgrade --install dograh ./infra/helm/dograh \
+#     -f infra/helm/dograh/values-on-prem.yaml \
+#     --set global.imageRegistry=registry.internal:5000
+
+global:
+  imageRegistry: registry.internal:5000
+  imagePullSecrets:
+    - name: registry-internal-creds
+
+onPrem:
+  enabled: true
+  offline: true
+  privateNetworking: true
+  tenantNetworkPolicies: true
+  localInference:
+    enabled: true
+    namespace: dograh-inference
+    configMapName: dograh-inference-routes
+
+nameOverride: ""
+fullnameOverride: ""
+
+images:
+  api:
+    repository: dograh/dograh-api
+    tag: on-prem
+    pullPolicy: IfNotPresent
+  worker:
+    repository: dograh/dograh-worker
+    tag: on-prem
+    pullPolicy: IfNotPresent
+  ui:
+    repository: dograh/dograh-ui
+    tag: on-prem
+    pullPolicy: IfNotPresent
+  gpuWorker:
+    repository: dograh/dograh-gpu-worker
+    tag: on-prem
+    pullPolicy: IfNotPresent
+
+api:
+  replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 12
+
+worker:
+  replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    keda:
+      enabled: true
+
+gpuWorker:
+  enabled: true
+  replicaCount: 1
+  nodeSelector:
+    accelerator: nvidia-gpu
+
+ui:
+  replicaCount: 2
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+    # No cert-manager in air-gap — use internal CA secret
+  hosts:
+    - host: voice.corp.internal
+      paths:
+        - path: /api/v1
+          pathType: Prefix
+          service: api
+        - path: /
+          pathType: Prefix
+          service: ui
+  tls:
+    - secretName: dograh-internal-tls
+      hosts:
+        - voice.corp.internal
+
+postgresql:
+  enabled: true
+  persistence:
+    size: 100Gi
+  external:
+    enabled: false
+
+redis:
+  enabled: true
+  persistence:
+    size: 20Gi
+  external:
+    enabled: false
+
+minio:
+  enabled: true
+  persistence:
+    size: 500Gi
+
+migration:
+  enabled: true
+
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true
+  grafanaDashboard:
+    enabled: true
+  otel:
+    enabled: true
+    endpoint: http://otel-collector.dograh-observability.svc:4317
+
+env:
+  ENVIRONMENT: production
+  DEPLOYMENT_MODE: oss
+  ENABLE_TELEMETRY: "true"
+  LOCAL_INFERENCE_ENABLED: "true"
+  INFERENCE_ROUTING_MODE: cluster-local
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.dograh-observability.svc:4317
+
+secrets:
+  create: false
+  existingSecret: dograh-onprem-secrets
+
+extraEnv:
+  - name: LOCAL_INFERENCE_ROUTES
+    valueFrom:
+      configMapKeyRef:
+        name: dograh-inference-routes
+        key: LOCAL_INFERENCE_ROUTES
+        optional: true
+
+serviceAccount:
+  create: true
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: api
+          topologyKey: kubernetes.io/hostname

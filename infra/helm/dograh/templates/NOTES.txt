@@ -1,0 +1,29 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Dograh AI voice platform is being deployed to namespace {{ .Release.Namespace }}.
+
+1. Get the application URL:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  https://{{ $host.host }}
+{{- end }}
+{{- else }}
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "dograh.fullname" . }}-api 8000:{{ .Values.api.port }}
+  Open http://localhost:8000/api/v1/health
+{{- end }}
+
+2. WebSocket endpoints (via Ingress):
+   - /api/v1/realtime-voice/ws
+   - /api/v1/realtime-audio/ws
+   - /api/v1/ws/signaling/*
+   - /api/v1/telephony/ws/*
+
+3. Metrics:
+   kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "dograh.fullname" . }}-api 8000:{{ .Values.api.port }}
+   curl http://localhost:8000/api/v1/realtime-observability/metrics
+
+4. Check rollout:
+   kubectl -n {{ .Release.Namespace }} get pods
+   kubectl -n {{ .Release.Namespace }} rollout status deployment/{{ include "dograh.fullname" . }}-api
+
+Documentation: infra/README.md

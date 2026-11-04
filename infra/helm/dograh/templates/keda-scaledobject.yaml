@@ -1,0 +1,36 @@
+{{- if and .Values.worker.autoscaling.enabled .Values.worker.autoscaling.keda.enabled .Values.redis.enabled }}
+# Optional KEDA ScaledObject — requires KEDA + Redis scaler installed.
+# Scales workers when ARQ queue depth exceeds threshold.
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "dograh.fullname" . }}-worker
+  labels:
+    {{- include "dograh.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    name: {{ include "dograh.fullname" . }}-worker
+  minReplicaCount: {{ .Values.worker.autoscaling.minReplicas }}
+  maxReplicaCount: {{ .Values.worker.autoscaling.maxReplicas }}
+  pollingInterval: 15
+  cooldownPeriod: 120
+  triggers:
+    - type: redis
+      metadata:
+        address: {{ include "dograh.fullname" . }}-redis:6379
+        passwordFromEnv: REDIS_PASSWORD
+        listName: arq:queue
+        listLength: "50"
+      authenticationRef:
+        name: {{ include "dograh.fullname" . }}-redis-trigger
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: {{ include "dograh.fullname" . }}-redis-trigger
+spec:
+  secretTargetRef:
+    - parameter: password
+      name: {{ include "dograh.secretName" . }}
+      key: REDIS_PASSWORD
+{{- end }}

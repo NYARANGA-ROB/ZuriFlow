@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dograh-observability
+  labels:
+    app.kubernetes.io/part-of: dograh
+    dograh.io/zone: observability
