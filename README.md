@@ -5,12 +5,6 @@
 
 
 <p align="center">
-  <a href="https://docs.dograh.com">📖 Docs</a> &nbsp;·&nbsp;
-  <a href="LICENSE">📜 BSD 2-Clause</a> &nbsp;·&nbsp;
-  <a href="README.zh-CN.md">🌐 中文</a>
-</p>
-
-<p align="center">
   <img src="docs/images/hero.gif" alt="ZuriFlow in action — build a workflow, launch a voice agent, talk to it" width="80%">
 </p>
 
