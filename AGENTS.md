@@ -1,11 +1,11 @@
-# Dograh - Project Overview
+# ZuriFlow - Project Overview
 
-Dograh is a voice AI platform for building and deploying conversational AI agents with telephony and WebRTC support.
+ZuriFlow is a voice AI platform for building and deploying conversational AI agents with telephony and WebRTC support.
 
 ## Project Structure
 
 ```
-dograh/
+ZuriFlow/
 ├── api/              # Backend - FastAPI application
 ├── ui/               # Frontend - Next.js application
 ├── scripts/          # Helper scripts for local development
