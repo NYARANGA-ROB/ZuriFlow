@@ -22,6 +22,7 @@ interface PropertyOption {
     description?: string;
 }
 
+
 interface PropertySpec {
     name: string;
     type: string;
@@ -85,7 +86,6 @@ function tsTypeFor(prop: PropertySpec, ownerClass: string): string {
     }
     return SCALAR_TS_TYPES[prop.type] ?? "unknown";
 }
-
 // ─── JSDoc rendering ──────────────────────────────────────────────────────
 
 function renderJsDoc(description: string, llmHint?: string | null, indent = 0): string {
