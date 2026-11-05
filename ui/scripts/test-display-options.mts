@@ -11,7 +11,6 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-
 import { evaluateDisplayOptions } from "../src/components/flow/renderer/displayOptions.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -28,7 +27,6 @@ interface Case {
 }
 
 const data = JSON.parse(readFileSync(FIXTURES_PATH, "utf-8")) as { cases: Case[] };
-
 let failed = 0;
 for (const c of data.cases) {
     const actual = evaluateDisplayOptions(c.rules, c.values);
