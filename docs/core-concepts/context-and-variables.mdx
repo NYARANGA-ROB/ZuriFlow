@@ -4,7 +4,6 @@ description: "How data flows into, through, and out of a conversation"
 ---
 
 Dograh has a simple data model for passing information through a call. Understanding it is key to building agents that feel personalised and to extracting useful results after a call.
-
 ## The three context objects
 
 ```
@@ -15,6 +14,8 @@ initial_context ──► Agent ──► gathered_context
 ```
 
 ### initial_context
+
+
 
 Data available to the agent before the call starts — the contact's name, account details, appointment information, anything the agent should know upfront. It can be set from several places:
 
@@ -36,6 +37,7 @@ whether they'd like to continue.
 When the call starts, Dograh substitutes the values before sending the prompt to the LLM — so the agent speaks naturally as if it already knows the contact.
 
 ### Fallback values
+
 
 If a variable might be missing or empty, use a pipe (`|`) to provide a default value:
 
@@ -111,6 +113,7 @@ sequenceDiagram
     LLM-->>Dog: gathered_context: {renewal_confirmed: true}
     Dog-->>App: Run record with gathered_context
 ```
+
 
 ## Where variables are available
 
