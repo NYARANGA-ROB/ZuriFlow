@@ -1,5 +1,6 @@
 """GENERATED — do not edit. Source: filtered OpenAPI from `api.app`.
 
+
 Regenerate with `./scripts/generate_sdk.sh`.
 
 `DograhClient` mixes in this class to get HTTP methods for every route
