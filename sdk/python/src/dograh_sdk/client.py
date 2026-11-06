@@ -1,5 +1,6 @@
 """HTTP client for the Dograh REST API.
 
+
 Most endpoint methods come from `_GeneratedClient` (auto-generated from
 the FastAPI OpenAPI spec — see `scripts/generate_sdk.sh`). This class
 adds the session/auth/cache surface around that mixin plus a couple of
