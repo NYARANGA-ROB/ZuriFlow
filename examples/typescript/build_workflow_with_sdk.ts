@@ -16,6 +16,7 @@ import { DograhClient, Workflow } from "@dograh/sdk";
 // Create one via the UI or with create_workflow.ts if you don't have one yet.
 const WORKFLOW_ID = 0;
 
+
 async function main(): Promise<void> {
     const apiEndpoint = process.env.DOGRAH_API_ENDPOINT ?? "http://localhost:8000";
     const apiToken = process.env.DOGRAH_API_TOKEN;
