@@ -1,6 +1,6 @@
-# Dograh SDK Examples
 
-Runnable examples of the Dograh SDK in Python and TypeScript.
+
+Runnable examples of the ZuriFlow SDK in Python and TypeScript.
 
 ## Shared environment variables
 
