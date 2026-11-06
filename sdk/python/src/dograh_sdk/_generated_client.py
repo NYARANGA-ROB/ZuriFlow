@@ -8,6 +8,7 @@ decorated with `sdk_expose(...)` on the backend. Request/response types
 come from `_generated_models` (datamodel-codegen output).
 """
 
+
 from __future__ import annotations
 
 from typing import Any
