@@ -28,7 +28,6 @@ from ._generated_models import (
 from .errors import ApiError, SpecMismatchError
 from .workflow import Workflow
 
-
 class DograhClient(_GeneratedClient):
     """Sync HTTP client. Suitable for scripts, pytest, and the LLM SDK
     exec sandbox.
