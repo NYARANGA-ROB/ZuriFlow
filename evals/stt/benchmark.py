@@ -17,7 +17,6 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-
 from evals.stt.providers import (
     DeepgramProvider,
     DeepgramFluxProvider,
