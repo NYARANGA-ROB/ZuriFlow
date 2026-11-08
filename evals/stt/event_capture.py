@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """STT Event Capture Runner.
-
 Streams audio to STT providers and captures raw WebSocket events with timestamps
 for visualization in the web UI.
 
