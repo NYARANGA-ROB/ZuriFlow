@@ -1,5 +1,4 @@
 #!/bin/bash
-
 PID=$1
 while true; do
   # Clear the screen
