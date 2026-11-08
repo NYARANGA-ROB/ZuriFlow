@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate release notes from CHANGELOG.md for use in GitHub Releases (or anywhere).
+"""Generate release notes from CHANGELOG.md for use in GitHub Releases 
 
 Usage::
 
