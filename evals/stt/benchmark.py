@@ -4,7 +4,6 @@ Compare speech-to-text transcription across providers with focus on:
 - Speaker diarization accuracy
 - Keyword/keyterm recognition
 - Transcription quality
-
 Usage:
     python -m evals.stt.benchmark audio/multi_speaker.m4a --diarize
     python -m evals.stt.benchmark audio/multi_speaker.m4a --diarize --providers deepgram
