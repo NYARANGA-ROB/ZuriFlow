@@ -2,7 +2,6 @@
 """STT Event Capture Runner.
 Streams audio to STT providers and captures raw WebSocket events with timestamps
 for visualization in the web UI.
-
 Usage:
     python -m evals.stt.event_capture audio/multi_speaker.m4a --provider deepgram
     python -m evals.stt.event_capture audio/multi_speaker.m4a --provider speechmatics
