@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """STT Benchmark Runner.
-
 Compare speech-to-text transcription across providers with focus on:
 - Speaker diarization accuracy
 - Keyword/keyterm recognition
