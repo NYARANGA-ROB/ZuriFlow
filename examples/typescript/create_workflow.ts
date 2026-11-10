@@ -12,7 +12,6 @@
 
 
 import { DograhClient } from "@dograh/sdk";
-
 const WORKFLOW_NAME = "My SDK-created agent";
 
 // A minimal starter agent with a single `startCall` node that greets the user.
