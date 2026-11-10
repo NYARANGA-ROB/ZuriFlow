@@ -9,7 +9,6 @@
 //
 // Run:
 //   npx tsx create_workflow.ts
-
 import { DograhClient } from "@dograh/sdk";
 const WORKFLOW_NAME = "My SDK-created agent";
 
