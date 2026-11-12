@@ -13,7 +13,6 @@ export interface EventCaptureResult {
   transcript: string;
   keyterms?: string[];
 }
-
 export interface ResultSummary {
   id: string;
   audio_file: string;
