@@ -1,6 +1,5 @@
 "use client";
 import { useRef, useEffect, useState, useCallback } from "react";
-
 interface AudioPlayerProps {
   audioUrl: string;
   duration: number;
