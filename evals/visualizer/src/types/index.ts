@@ -3,7 +3,6 @@ export interface CapturedEvent {
   event_type: string;
   data: Record<string, unknown>;
 }
-
 export interface EventCaptureResult {
   audio_file: string;
   audio_path: string;
