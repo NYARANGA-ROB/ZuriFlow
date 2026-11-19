@@ -1,5 +1,4 @@
 __DOGRAH_UPSTREAM_BLOCK__
-
 server {
     listen 80;
     server_name __DOGRAH_PUBLIC_HOST__;
