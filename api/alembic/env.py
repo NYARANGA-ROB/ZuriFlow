@@ -20,7 +20,6 @@ fileConfig(config.config_file_name)
 from api.db.models import Base  # noqa: E402 ensure this points to your models.py
 target_metadata = Base.metadata
 
-
 def get_url():
     """Get database URL from environment variable or config file."""
     return DATABASE_URL or config.get_main_option("sqlalchemy.url")
