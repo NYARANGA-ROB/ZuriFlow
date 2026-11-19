@@ -7,7 +7,6 @@ import alembic_postgresql_enum  # noqa: F401 - registers enum handling hooks
 from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import create_async_engine
-
 from api.constants import DATABASE_URL
 
 # Add parent directory to path
