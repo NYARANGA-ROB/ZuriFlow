@@ -47,7 +47,6 @@ def include_object(object, name, type_, reflected, compare_to):
     """
     # Unused parameters are required by Alembic's API
     _ = (name, reflected, compare_to)
-
     if type_ == "index":
         # Skip indexes on primary key columns that aren't unique
         # Primary keys already have implicit unique indexes
