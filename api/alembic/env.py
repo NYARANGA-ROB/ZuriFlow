@@ -25,7 +25,6 @@ def get_url():
     """Get database URL from environment variable or config file."""
     return DATABASE_URL or config.get_main_option("sqlalchemy.url")
 
-
 def run_migrations_offline():
     """Run migrations in 'offline' mode."""
     url = get_url()
